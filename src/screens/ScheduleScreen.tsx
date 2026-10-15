@@ -2,17 +2,24 @@ import { useState } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import { Button, DateChips, IconBox, ScreenLayout, TimePicker } from '../components';
 import { ICONS } from '../constants/icons';
+import { nextHour } from '../logic/schedule';
 import { colors } from '../theme/colors';
 import { common } from '../theme/commonStyles';
 import { radius } from '../theme/tokens';
 import type { EditableScreenProps } from '../types';
 
 export function ScheduleScreen({ state, patch, go }: EditableScreenProps) {
-  const [time, setTime] = useState(state.selectedTime);
-  const [date, setDate] = useState(state.selectedDate);
+  const initial = state.schedule ?? nextHour();
+  const [time, setTime] = useState(initial.time);
+  const [date, setDate] = useState(initial.date);
 
   function confirm() {
-    patch({ selectedTime: time, selectedDate: date });
+    patch({ schedule: { date, time } });
+    go('home');
+  }
+
+  function resetToNext() {
+    patch({ schedule: null });
     go('home');
   }
 
@@ -38,9 +45,15 @@ export function ScheduleScreen({ state, patch, go }: EditableScreenProps) {
         </View>
       </View>
 
+      <Text style={common.hint}>
+        Você verá a primeira previsão disponível a partir do horário escolhido. Os horários exibidos seguem o fuso do seu
+        aparelho.
+      </Text>
+
       <View style={common.stack}>
         <Button label="Consultar previsão" onPress={confirm} />
-        <Button label="Voltar" onPress={() => go('home')} variant="secondary" />
+        <Button label="Ver a próxima previsão" onPress={resetToNext} variant="secondary" />
+        <Button label="Voltar" onPress={() => go('home')} variant="ghost" />
       </View>
     </ScreenLayout>
   );

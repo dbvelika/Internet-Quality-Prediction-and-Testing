@@ -1,8 +1,10 @@
 export { Button } from './Button';
+export { ChoiceCard } from './ChoiceCard';
 export { DateChips } from './DateChips';
-export { ErrorState, LoadingState, MockNotice } from './Feedback';
+export { ErrorState, LoadingState } from './Feedback';
 export { IconBox } from './IconBox';
 export { IndicatorRow } from './IndicatorRow';
+export { PlaceBar } from './PlaceBar';
 export { QualityBadge } from './QualityBadge';
 export { ScreenLayout } from './ScreenLayout';
 export { TimePicker } from './TimePicker';
