@@ -1,68 +1,59 @@
-import { StyleSheet, Text, View } from 'react-native';
-import { Button, ErrorState, IconBox, LoadingState, MockNotice, QualityBadge, ScreenLayout } from '../components';
-import { ACTIVITIES } from '../constants/activities';
+import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { Button, ErrorState, IconBox, IndicatorRow, LoadingState, PlaceBar, QualityBadge, ScreenLayout } from '../components';
 import { ICONS, QUALITY_ICON } from '../constants/icons';
 import { QUALITY_SUMMARY } from '../content/texts';
-import { useForecast } from '../hooks/useForecast';
-import { getAvailableActivities } from '../logic/rules';
+import { useDeviceLocation } from '../hooks/useDeviceLocation';
+import { useForecast } from '../hooks/queries';
 import { colors, qualityColors } from '../theme/colors';
 import { common } from '../theme/commonStyles';
-import { radius } from '../theme/tokens';
-import type { Forecast, ScreenProps } from '../types';
-import { formatDate } from '../utils/format';
+import { radius, touch } from '../theme/tokens';
+import type { EditableScreenProps, Forecast } from '../types';
+import { formatDateTime, formatKm, formatMs, formatPercent } from '../utils/format';
 
-function ForecastSection({ forecast, time }: { forecast: Forecast; time: string }) {
-  const { quality } = forecast;
-  const c = qualityColors[quality];
-  const available = getAvailableActivities(quality);
+function ForecastSection({ forecast, scheduled }: { forecast: Forecast; scheduled: boolean }) {
+  const c = qualityColors[forecast.quality];
 
   return (
     <>
-      {forecast.source === 'mock' ? <MockNotice /> : null}
-
       <View style={[common.card, { backgroundColor: c.bg, borderColor: c.border }]}>
         <Text style={common.sectionLabel}>Qualidade esperada</Text>
         <View style={styles.qualityRow}>
           <IconBox
-            icon={QUALITY_ICON[quality]}
+            icon={QUALITY_ICON[forecast.quality]}
             background={c.badgeBg}
             color={c.badgeFg}
             size={56}
             cornerRadius={radius.md}
           />
           <View style={styles.qualityText}>
-            <QualityBadge quality={quality} />
-            <Text style={[styles.forTime, { color: c.fg }]}>Para o horário das {time}</Text>
+            <QualityBadge quality={forecast.quality} />
+            <Text style={[styles.forTime, { color: c.fg }]}>
+              {scheduled ? 'Previsão para' : 'Próxima previsão:'} {formatDateTime(forecast.predictionFor)}
+            </Text>
           </View>
         </View>
-        <Text style={common.body}>{QUALITY_SUMMARY[quality]}</Text>
+        <Text style={common.body}>{forecast.advice ?? QUALITY_SUMMARY[forecast.quality]}</Text>
       </View>
 
       <View>
-        <Text style={common.sectionLabel}>O que você poderá fazer?</Text>
-        <View style={styles.activities}>
-          {ACTIVITIES.map(({ name }) => {
-            const ok = available.includes(name);
-            return (
-              <View key={name} style={[styles.activityRow, { backgroundColor: ok ? colors.greenBg : colors.slate50 }]}>
-                <View style={[styles.dot, { backgroundColor: ok ? colors.green : colors.slate300 }]}>
-                  <Text style={[styles.dotText, { color: ok ? colors.white : colors.slate500 }]}>
-                    {ok ? ICONS.check : ICONS.dash}
-                  </Text>
-                </View>
-                <Text style={[styles.activityName, { color: ok ? colors.slate800 : colors.slate500 }]}>{name}</Text>
-                {!ok ? <Text style={styles.notRecommended}>Não recomendado</Text> : null}
-              </View>
-            );
-          })}
+        <Text style={common.sectionLabel}>Detalhes da previsão</Text>
+        <View style={styles.rows}>
+          <IndicatorRow kind="latency" measure={formatMs(forecast.latencyMs)} />
+          <IndicatorRow kind="loss" measure={formatPercent(forecast.lossPct)} />
         </View>
+      </View>
+
+      <View style={common.box}>
+        <Text style={common.rowLabel}>Referência de medição</Text>
+        <Text style={common.body}>Probe a aproximadamente {formatKm(forecast.probe.distanceKm)}</Text>
       </View>
     </>
   );
 }
 
-export function HomeScreen({ state, go }: ScreenProps) {
-  const { forecast, loading, error, reload } = useForecast(state.selectedDate, state.selectedTime);
+export function HomeScreen({ state, patch, go }: EditableScreenProps) {
+  const { data: forecast, loading, error, reload } = useForecast(state.modelId, state.place, state.schedule);
+  const location = useDeviceLocation((place) => patch({ place }));
 
   return (
     <ScreenLayout>
@@ -72,29 +63,33 @@ export function HomeScreen({ state, go }: ScreenProps) {
           Compyuter<Text style={{ color: colors.blue }}>'s</Text>
         </Text>
       </View>
-      <Text style={styles.tagline}>Previsão da sua conexão de internet</Text>
 
-      <View style={common.row}>
-        <View style={styles.pill}>
-          <Text style={styles.pillText}>
-            {ICONS.calendar} {formatDate(state.selectedDate)}
-          </Text>
+      <View style={styles.modelRow}>
+        <View style={styles.modelText}>
+          <Text style={styles.modelLabel}>Modelo em uso</Text>
+          <Text style={styles.modelName}>{forecast?.model.name ?? (loading ? 'Carregando…' : '—')}</Text>
         </View>
-        <View style={[styles.pill, { backgroundColor: colors.blue }]}>
-          <Text style={[styles.pillText, { color: colors.white, fontWeight: '700' }]}>
-            {ICONS.clock} {state.selectedTime}
-          </Text>
-        </View>
+        <Pressable
+          onPress={() => go('models')}
+          accessibilityRole="button"
+          accessibilityLabel="Alterar modelo de previsão"
+          style={styles.change}
+        >
+          <Text style={styles.changeText}>Alterar</Text>
+        </Pressable>
       </View>
+
+      <PlaceBar place={state.place} status={location.status} onUseDevice={location.request} />
 
       {loading ? <LoadingState /> : null}
       {error ? <ErrorState message={error} onRetry={reload} /> : null}
-      {forecast ? <ForecastSection forecast={forecast} time={state.selectedTime} /> : null}
+      {forecast ? <ForecastSection forecast={forecast} scheduled={state.schedule !== null} /> : null}
 
       <View style={common.stack}>
-        <Button label="Ver detalhes" onPress={() => go('details')} disabled={!forecast} />
+        <Button label="Planejar uma atividade" onPress={() => go('activity')} />
         <Button label="Escolher outro horário" onPress={() => go('schedule')} variant="secondary" />
-        <Button label="Ver por atividade →" onPress={() => go('activity')} variant="ghost" />
+        <Button label="Entenda esta previsão" onPress={() => go('about')} variant="secondary" />
+        <Button label="Ver próximas previsões" onPress={() => go('timeline')} variant="ghost" />
       </View>
     </ScreenLayout>
   );
@@ -102,16 +97,14 @@ export function HomeScreen({ state, go }: ScreenProps) {
 
 const styles = StyleSheet.create({
   brand: { fontSize: 24, fontWeight: '800', color: colors.slate900 },
-  tagline: { fontSize: 14, color: colors.slate500, fontWeight: '500', marginTop: -12 },
-  pill: { backgroundColor: colors.slate100, borderRadius: radius.sm, paddingHorizontal: 12, paddingVertical: 8 },
-  pillText: { fontSize: 14, fontWeight: '500', color: colors.slate700 },
+  modelRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 12 },
+  modelText: { flexShrink: 1 },
+  modelLabel: { fontSize: 12, color: colors.slate500, fontWeight: '500' },
+  modelName: { fontSize: 20, fontWeight: '700', color: colors.slate900 },
+  change: { minHeight: touch.minSize, justifyContent: 'center', paddingHorizontal: 8 },
+  changeText: { fontSize: 14, fontWeight: '600', color: colors.blue },
   qualityRow: { flexDirection: 'row', alignItems: 'center', gap: 12, marginBottom: 12 },
   qualityText: { flex: 1, alignItems: 'flex-start', gap: 4 },
   forTime: { fontSize: 12, fontWeight: '500' },
-  activities: { gap: 8 },
-  activityRow: { flexDirection: 'row', alignItems: 'center', gap: 12, borderRadius: radius.md, paddingHorizontal: 16, paddingVertical: 12 },
-  dot: { width: 24, height: 24, borderRadius: 12, alignItems: 'center', justifyContent: 'center' },
-  dotText: { fontSize: 12, fontWeight: '700' },
-  activityName: { flex: 1, fontSize: 14, fontWeight: '500' },
-  notRecommended: { fontSize: 12, color: colors.slate500 },
+  rows: { gap: 8 },
 });

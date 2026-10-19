@@ -1,19 +1,16 @@
 // FUNCIONALIDADE — estado global do app e navegação entre telas.
 import { useCallback, useState } from 'react';
+import { DEFAULT_PLACE } from '../services/config';
 import type { AppState, ScreenName } from '../types';
-import { toISO } from '../utils/format';
 
 export function useAppState() {
-  const [state, setState] = useState<AppState>(() => {
-    const today = toISO(new Date());
-    return {
-      screen: 'home',
-      selectedTime: '20:00',
-      selectedDate: today,
-      selectedActivity: null,
-      activityTime: '20:00',
-      activityDate: today,
-    };
+  const [state, setState] = useState<AppState>({
+    screen: 'home',
+    modelId: null,
+    place: DEFAULT_PLACE,
+    schedule: null,
+    activity: null,
+    activityWhen: null,
   });
 
   const go = useCallback((screen: ScreenName) => setState((prev) => ({ ...prev, screen })), []);

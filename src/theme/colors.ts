@@ -1,5 +1,5 @@
-// DESIGN — paleta de cores e cores por qualidade/nível.
-import type { Level, Quality } from '../types';
+// DESIGN — paleta de cores e cores por qualidade.
+import type { Quality } from '../types';
 
 export const colors = {
   white: '#ffffff',
@@ -38,10 +38,4 @@ export const qualityColors: Record<Quality, QualityColors> = {
   BOA: { fg: colors.green, bg: colors.greenBg, border: '#bbf7d0', badgeBg: '#dcfce7', badgeFg: '#166534' },
   REGULAR: { fg: colors.amber, bg: colors.amberBg, border: '#fde68a', badgeBg: '#fef3c7', badgeFg: '#92400e' },
   'INSTÁVEL': { fg: colors.red, bg: colors.redBg, border: '#fecaca', badgeBg: '#fee2e2', badgeFg: '#991b1b' },
-};
-
-export const levelColors: Record<Level, { fg: string; bg: string }> = {
-  low: { fg: colors.green, bg: colors.greenBg },
-  medium: { fg: colors.amber, bg: colors.amberBg },
-  high: { fg: colors.red, bg: colors.redBg },
 };

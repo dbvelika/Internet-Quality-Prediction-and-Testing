@@ -6,10 +6,9 @@ export const ICONS = {
   logo: '⚡',
   calendar: '📅',
   clock: '🕐',
-  tip: '💡',
+  pin: '📍',
   back: '‹',
   check: '✓',
-  dash: '–',
 } as const;
 
 export const QUALITY_ICON: Record<Quality, string> = {
@@ -19,9 +18,10 @@ export const QUALITY_ICON: Record<Quality, string> = {
 };
 
 export const ACTIVITY_ICON: Record<Activity, string> = {
-  'Videoconferência': '📹',
-  Streaming: '🎬',
-  'Jogos online': '🎮',
-  'Navegação': '🌐',
-  'Enviar arquivos': '📁',
+  VIDEO_CALL: '📹',
+  AUDIO_CALL: '🎧',
+  STREAMING: '🎬',
+  FILE_UPLOAD: '📁',
+  WEB_BROWSING: '🌐',
+  MESSAGING: '💬',
 };
