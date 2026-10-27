@@ -83,6 +83,9 @@ export function HomeScreen({ state, patch, go }: EditableScreenProps) {
 
       {loading ? <LoadingState /> : null}
       {error ? <ErrorState message={error} onRetry={reload} /> : null}
+      {error && state.schedule ? (
+        <Button label="Ver a próxima previsão" onPress={() => patch({ schedule: null })} variant="secondary" />
+      ) : null}
       {forecast ? <ForecastSection forecast={forecast} scheduled={state.schedule !== null} /> : null}
 
       <View style={common.stack}>

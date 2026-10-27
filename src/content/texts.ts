@@ -36,6 +36,8 @@ export const ERROR_TEXT: Record<ApiErrorKind | 'unknown', string> = {
   http: 'O servidor não conseguiu gerar a previsão agora. Tente de novo em alguns instantes.',
   parse: 'O servidor respondeu em um formato inesperado.',
   notFound: 'Não há previsão para este modelo nesta região. Tente escolher outro modelo.',
-  noData: 'Ainda não há previsão para esse horário. Escolha outro horário ou veja as próximas previsões.',
+  noData:
+    'A API não tem previsão para esse dia e horário: ela só cobre um período limitado. Veja as próximas previsões e escolha um horário que esteja na lista.',
+  noModel: 'Nenhum modelo de previsão está disponível agora. Tente de novo em alguns instantes.',
   unknown: 'Algo deu errado ao buscar a previsão. Tente de novo.',
 };

@@ -10,7 +10,7 @@ export type Activity = 'VIDEO_CALL' | 'AUDIO_CALL' | 'STREAMING' | 'FILE_UPLOAD'
 
 export type IndicatorKind = 'latency' | 'loss';
 
-export type ApiErrorKind = 'network' | 'timeout' | 'http' | 'parse' | 'notFound' | 'noData';
+export type ApiErrorKind = 'network' | 'timeout' | 'http' | 'parse' | 'notFound' | 'noData' | 'noModel';
 
 export type LocationStatus = 'idle' | 'loading' | 'denied' | 'error';
 
