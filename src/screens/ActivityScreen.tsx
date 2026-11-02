@@ -1,8 +1,10 @@
 import { useState } from 'react';
 import { Text, View } from 'react-native';
+import { useLibrasText } from '../accessibility';
 import { Button, ChoiceCard, DateChips, ScreenLayout, TimePicker } from '../components';
 import { ACTIVITIES } from '../constants/activities';
 import { ICONS } from '../constants/icons';
+import { LIBRAS_TEXT } from '../content/texts';
 import { nextHour } from '../logic/schedule';
 import { common } from '../theme/commonStyles';
 import type { Activity, EditableScreenProps } from '../types';
@@ -12,6 +14,7 @@ export function ActivityScreen({ state, patch, go }: EditableScreenProps) {
   const [selected, setSelected] = useState<Activity | null>(state.activity);
   const [time, setTime] = useState(initial.time);
   const [date, setDate] = useState(initial.date);
+  useLibrasText(LIBRAS_TEXT.screens.activity);
 
   function check() {
     patch({ activity: selected, activityWhen: { date, time } });

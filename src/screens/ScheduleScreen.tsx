@@ -1,7 +1,9 @@
 import { useState } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
+import { useLibrasText } from '../accessibility';
 import { Button, DateChips, IconBox, ScreenLayout, TimePicker } from '../components';
 import { ICONS } from '../constants/icons';
+import { LIBRAS_TEXT } from '../content/texts';
 import { nextHour } from '../logic/schedule';
 import { colors } from '../theme/colors';
 import { common } from '../theme/commonStyles';
@@ -12,6 +14,7 @@ export function ScheduleScreen({ state, patch, go }: EditableScreenProps) {
   const initial = state.schedule ?? nextHour();
   const [time, setTime] = useState(initial.time);
   const [date, setDate] = useState(initial.date);
+  useLibrasText(LIBRAS_TEXT.screens.schedule);
 
   function confirm() {
     patch({ schedule: { date, time } });

@@ -1,6 +1,7 @@
 // Ponto de entrada: só decide qual tela mostrar. Design, regras, dados e textos ficam em src/.
 import { StatusBar } from 'expo-status-bar';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
+import { LibrasProvider, VLibras } from './src/accessibility';
 import { useAppState } from './src/hooks/useAppState';
 import { AboutScreen } from './src/screens/AboutScreen';
 import { ActivityScreen } from './src/screens/ActivityScreen';
@@ -15,14 +16,17 @@ export default function App() {
 
   return (
     <SafeAreaProvider>
-      <StatusBar style="dark" />
-      {state.screen === 'home' && <HomeScreen state={state} patch={patch} go={go} />}
-      {state.screen === 'schedule' && <ScheduleScreen state={state} patch={patch} go={go} />}
-      {state.screen === 'about' && <AboutScreen state={state} go={go} />}
-      {state.screen === 'activity' && <ActivityScreen state={state} patch={patch} go={go} />}
-      {state.screen === 'result' && <ResultScreen state={state} go={go} />}
-      {state.screen === 'models' && <ModelsScreen state={state} patch={patch} go={go} />}
-      {state.screen === 'timeline' && <TimelineScreen state={state} patch={patch} go={go} />}
+      <LibrasProvider>
+        <StatusBar style="dark" />
+        {state.screen === 'home' && <HomeScreen state={state} patch={patch} go={go} />}
+        {state.screen === 'schedule' && <ScheduleScreen state={state} patch={patch} go={go} />}
+        {state.screen === 'about' && <AboutScreen state={state} go={go} />}
+        {state.screen === 'activity' && <ActivityScreen state={state} patch={patch} go={go} />}
+        {state.screen === 'result' && <ResultScreen state={state} go={go} />}
+        {state.screen === 'models' && <ModelsScreen state={state} patch={patch} go={go} />}
+        {state.screen === 'timeline' && <TimelineScreen state={state} patch={patch} go={go} />}
+        <VLibras />
+      </LibrasProvider>
     </SafeAreaProvider>
   );
 }

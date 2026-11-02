@@ -50,5 +50,6 @@ const styles = StyleSheet.create({
   },
   backIcon: { fontSize: 26, color: colors.slate600, marginTop: -2 },
   title: { flex: 1, fontSize: 20, fontWeight: '700', color: colors.slate900 },
-  content: { padding: 24, gap: 20 },
+  // O espaço extra embaixo deixa o último botão rolar acima do botão flutuante do VLibras.
+  content: { padding: 24, paddingBottom: 96, gap: 20 },
 });

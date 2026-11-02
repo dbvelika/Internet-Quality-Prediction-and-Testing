@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
+import { activityLines, useLibrasText } from '../accessibility';
 import { Button, ErrorState, IconBox, IndicatorRow, LoadingState, QualityBadge, ScreenLayout } from '../components';
 import { ACTIVITIES } from '../constants/activities';
 import { QUALITY_ICON } from '../constants/icons';
@@ -51,6 +52,7 @@ export function ResultScreen({ state, go }: ScreenProps) {
   const [when] = useState<Schedule>(() => state.activityWhen ?? nextHour());
   const { data: result, loading, error, reload } = useActivityCheck(state.modelId, state.place, activity, when);
   const info = ACTIVITIES.find((a) => a.code === activity);
+  useLibrasText(result ? activityLines(result, info?.label ?? '', when) : error ? [error] : []);
 
   return (
     <ScreenLayout title="Resultado da previsão" onBack={() => go('activity')}>

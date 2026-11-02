@@ -1,5 +1,7 @@
 import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { timelineLines, useLibrasText } from '../accessibility';
 import { Button, ErrorState, LoadingState, QualityBadge, ScreenLayout } from '../components';
+import { LIBRAS_TEXT } from '../content/texts';
 import { useTimeline } from '../hooks/queries';
 import { scheduleFromIso } from '../logic/schedule';
 import { colors } from '../theme/colors';
@@ -10,6 +12,7 @@ import { formatDateTime, formatMs, formatPercent } from '../utils/format';
 
 export function TimelineScreen({ state, patch, go }: EditableScreenProps) {
   const { data: entries, loading, error, reload } = useTimeline(state.modelId, state.place);
+  useLibrasText(error ? [error] : timelineLines(LIBRAS_TEXT.screens.timeline, entries));
 
   function choose(entry: TimelineEntry) {
     patch({ schedule: scheduleFromIso(entry.predictionFor) });

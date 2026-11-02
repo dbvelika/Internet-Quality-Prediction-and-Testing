@@ -1,4 +1,5 @@
 import { StyleSheet, Text, View } from 'react-native';
+import { aboutLines, useLibrasText } from '../accessibility';
 import { Button, ErrorState, LoadingState, ScreenLayout } from '../components';
 import { ABOUT, GLOSSARY } from '../content/texts';
 import { useForecast } from '../hooks/queries';
@@ -21,6 +22,7 @@ function Section({ title, children }: { title: string; children: string }) {
 export function AboutScreen({ state, go }: ScreenProps) {
   // Os avisos não dependem do horário; pedir a previsão sem horário reaproveita a resposta em cache.
   const { data: forecast, loading, error, reload } = useForecast(state.modelId, state.place, null);
+  useLibrasText(aboutLines(forecast?.notes ?? null));
 
   return (
     <ScreenLayout title="Sobre esta previsão" onBack={() => go('home')}>
