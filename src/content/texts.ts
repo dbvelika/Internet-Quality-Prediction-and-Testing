@@ -44,6 +44,9 @@ export const LIBRAS_TEXT = {
   pageHint: 'Toque em um texto para ver a tradução em Libras.',
   empty: 'Esta tela ainda não tem texto para traduzir.',
   offline: 'Não foi possível carregar o VLibras. Verifique a internet, feche esta janela e abra de novo.',
+  diagnosticTitle: 'Diagnóstico do VLibras (segure o título para mostrar ou esconder)',
+  diagnosticEmpty: 'Nenhuma requisição ainda. Toque em um texto para o avatar traduzir.',
+  diagnosticLabel: { ok: 'OK', erro: 'ERRO', info: 'INFO' },
   credit: 'O VLibras é um serviço do Governo Federal. A tradução é automática e não substitui um intérprete de Libras.',
   screens: {
     schedule: ['Escolha o horário.', 'Qual horário você quer consultar? Você verá a primeira previsão disponível a partir do horário escolhido.'],

@@ -1,6 +1,6 @@
 // ACESSIBILIDADE — VLibras no celular: botão flutuante que abre uma janela com o widget dentro de uma WebView.
-import { useMemo, useState } from 'react';
-import { ActivityIndicator, Modal, Pressable, StyleSheet, Text, View } from 'react-native';
+import { useEffect, useMemo, useRef, useState } from 'react';
+import { ActivityIndicator, Modal, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { WebView } from 'react-native-webview';
 import { ICONS } from '../constants/icons';
@@ -9,23 +9,52 @@ import { colors } from '../theme/colors';
 import { common } from '../theme/commonStyles';
 import { radius, touch } from '../theme/tokens';
 import { useLibrasLines } from './LibrasContext';
-import { VLIBRAS_ORIGIN, buildLibrasHtml, isAllowedLibrasUrl } from './libras';
+import {
+  DIAGNOSTIC_SCRIPT,
+  VLIBRAS_ORIGIN,
+  buildLibrasHtml,
+  isAllowedLibrasUrl,
+  parseLogMessage,
+} from './libras';
+import type { LibrasLogMessage } from './libras';
+
+const MAX_LOG = 40;
+type LogEntry = LibrasLogMessage & { id: number };
 
 function LibrasModal({ visible, onClose }: { visible: boolean; onClose: () => void }) {
   const lines = useLibrasLines();
   // A página só é montada com a janela aberta (o Modal não desenha nada quando fechado).
   const html = useMemo(() => buildLibrasHtml(lines), [lines]);
 
+  // Diagnóstico (escondido): segurar o título mostra as requisições que o widget faz.
+  const [showLog, setShowLog] = useState(false);
+  const [log, setLog] = useState<LogEntry[]>([]);
+  const nextId = useRef(0);
+  useEffect(() => {
+    if (!visible) setLog([]);
+  }, [visible]);
+
+  function addLog(message: LibrasLogMessage) {
+    nextId.current += 1;
+    const entry = { ...message, id: nextId.current };
+    setLog((previous) => [entry, ...previous].slice(0, MAX_LOG));
+  }
+
   return (
     <Modal visible={visible} animationType="slide" onRequestClose={onClose}>
       <SafeAreaView style={styles.modal}>
         <View style={styles.header}>
-          <View style={styles.headerText}>
+          <Pressable
+            style={styles.headerText}
+            onLongPress={() => setShowLog((value) => !value)}
+            delayLongPress={600}
+            accessible={false}
+          >
             <Text accessibilityRole="header" style={styles.title}>
               {LIBRAS_TEXT.title}
             </Text>
             <Text style={common.muted}>{LIBRAS_TEXT.subtitle}</Text>
-          </View>
+          </Pressable>
           <Pressable
             onPress={onClose}
             accessibilityRole="button"
@@ -40,6 +69,15 @@ function LibrasModal({ visible, onClose }: { visible: boolean; onClose: () => vo
           source={{ html, baseUrl: `${VLIBRAS_ORIGIN}/` }}
           originWhitelist={['https://*']}
           onShouldStartLoadWithRequest={(request) => isAllowedLibrasUrl(request.url)}
+          injectedJavaScriptBeforeContentLoaded={DIAGNOSTIC_SCRIPT}
+          onMessage={(event) => {
+            const message = parseLogMessage(event.nativeEvent.data);
+            if (message) addLog(message);
+          }}
+          onError={(event) => addLog({ kind: 'erro', text: `WebView: ${event.nativeEvent.description}` })}
+          onHttpError={(event) =>
+            addLog({ kind: 'erro', text: `WebView: HTTP ${event.nativeEvent.statusCode} em ${event.nativeEvent.url}` })
+          }
           javaScriptEnabled
           domStorageEnabled
           setSupportMultipleWindows={false}
@@ -53,6 +91,20 @@ function LibrasModal({ visible, onClose }: { visible: boolean; onClose: () => vo
           )}
           style={styles.web}
         />
+
+        {showLog ? (
+          <View style={styles.log}>
+            <Text style={styles.logTitle}>{LIBRAS_TEXT.diagnosticTitle}</Text>
+            <ScrollView style={styles.logList} nestedScrollEnabled>
+              {log.length === 0 ? <Text style={styles.logLine}>{LIBRAS_TEXT.diagnosticEmpty}</Text> : null}
+              {log.map((entry) => (
+                <Text key={entry.id} style={styles.logLine}>
+                  {LIBRAS_TEXT.diagnosticLabel[entry.kind]} · {entry.text}
+                </Text>
+              ))}
+            </ScrollView>
+          </View>
+        ) : null}
 
         <Text style={[common.hint, styles.credit]}>{LIBRAS_TEXT.credit}</Text>
       </SafeAreaView>
@@ -125,4 +177,8 @@ const styles = StyleSheet.create({
     backgroundColor: colors.white,
   },
   credit: { paddingHorizontal: 24, paddingBottom: 12, marginTop: 8 },
+  log: { marginHorizontal: 16, padding: 8, borderRadius: radius.md, backgroundColor: colors.slate100 },
+  logTitle: { fontSize: 12, fontWeight: '700', color: colors.slate700, marginBottom: 4 },
+  logList: { maxHeight: 180 },
+  logLine: { fontSize: 11, color: colors.slate800, marginBottom: 4 },
 });

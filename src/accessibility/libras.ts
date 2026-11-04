@@ -69,6 +69,87 @@ export function buildLibrasHtml(lines: string[]): string {
 </html>`;
 }
 
+/**
+ * Diagnóstico: roda dentro da WebView antes do widget e avisa o app de cada requisição que o VLibras faz
+ * (tradução, dicionário de sinais), com o resultado, e de erros de JavaScript. Serve para descobrir por que o
+ * avatar soletra em vez de sinalizar: o guia do VLibras diz que ele soletra quando a API de tradução falha
+ * ou quando a palavra não está no dicionário.
+ */
+export const DIAGNOSTIC_SCRIPT = `
+(function () {
+  if (window.__librasDiag) return;
+  window.__librasDiag = true;
+  function post(kind, text) {
+    try { window.ReactNativeWebView.postMessage(JSON.stringify({ kind: kind, text: String(text).slice(0, 400) })); } catch (e) {}
+  }
+  function short(url) {
+    try { var u = new URL(url, location.href); return u.host + u.pathname; } catch (e) { return String(url).slice(0, 80); }
+  }
+  try {
+    var canvas = document.createElement('canvas');
+    post('info', 'WebGL2: ' + (canvas.getContext('webgl2') ? 'sim' : 'não') + ' | WebGL: ' + (canvas.getContext('webgl') ? 'sim' : 'não'));
+    post('info', 'Navegador: ' + navigator.userAgent);
+  } catch (e) {}
+
+  var open = XMLHttpRequest.prototype.open;
+  var send = XMLHttpRequest.prototype.send;
+  XMLHttpRequest.prototype.open = function (method, url) {
+    this.__diag = { label: method + ' ' + short(url), started: Date.now() };
+    return open.apply(this, arguments);
+  };
+  XMLHttpRequest.prototype.send = function (body) {
+    var info = this.__diag;
+    if (info) {
+      if (typeof body === 'string') info.body = body.slice(0, 80);
+      this.addEventListener('loadend', function () {
+        var ok = this.status >= 200 && this.status < 400;
+        var text = info.label + ' → ' + (this.status || 'falhou') + ' (' + (Date.now() - info.started) + ' ms)';
+        if (info.body) text += ' enviou: ' + info.body;
+        if (info.body && (this.responseType === '' || this.responseType === 'text')) text += ' recebeu: ' + String(this.responseText).slice(0, 80);
+        post(ok ? 'ok' : 'erro', text);
+      });
+    }
+    return send.apply(this, arguments);
+  };
+
+  if (window.fetch) {
+    var nativeFetch = window.fetch;
+    window.fetch = function (input, init) {
+      var label = ((init && init.method) || 'GET') + ' ' + short(typeof input === 'string' ? input : input && input.url);
+      var started = Date.now();
+      return nativeFetch.apply(this, arguments).then(
+        function (res) { post(res.ok ? 'ok' : 'erro', label + ' → ' + res.status + ' (' + (Date.now() - started) + ' ms)'); return res; },
+        function (err) { post('erro', label + ' → falhou: ' + err); throw err; }
+      );
+    };
+  }
+
+  window.addEventListener('error', function (e) { post('erro', 'Erro de JavaScript: ' + e.message); });
+  window.addEventListener('unhandledrejection', function (e) { post('erro', 'Promessa rejeitada: ' + (e.reason && e.reason.message || e.reason)); });
+  var consoleError = console.error;
+  console.error = function () { post('erro', 'console: ' + Array.prototype.join.call(arguments, ' ')); return consoleError.apply(console, arguments); };
+})();
+true;
+`;
+
+export type LibrasLogKind = 'ok' | 'erro' | 'info';
+export interface LibrasLogMessage {
+  kind: LibrasLogKind;
+  text: string;
+}
+
+/** Lê o que o script de diagnóstico enviou; qualquer outra mensagem é ignorada. */
+export function parseLogMessage(data: string): LibrasLogMessage | null {
+  try {
+    const message = JSON.parse(data) as { kind?: unknown; text?: unknown };
+    const { kind, text } = message;
+    if ((kind === 'ok' || kind === 'erro' || kind === 'info') && typeof text === 'string') return { kind, text };
+  } catch {
+    // não era uma mensagem do diagnóstico
+  }
+  return null;
+}
+
 export const WEB_ROOT_ID = 'vlibras-root';
 
 interface WindowWithVLibras extends Window {
