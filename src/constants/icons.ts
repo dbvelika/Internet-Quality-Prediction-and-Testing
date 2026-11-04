@@ -9,6 +9,7 @@ export const ICONS = {
   pin: '📍',
   back: '‹',
   check: '✓',
+  libras: '✋',
 } as const;
 
 export const QUALITY_ICON: Record<Quality, string> = {

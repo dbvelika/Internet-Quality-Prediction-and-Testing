@@ -30,12 +30,37 @@ export const ABOUT = {
   meaning: 'O que isso significa?',
 };
 
+/** VLibras (acessibilidade em Libras): botão, janela e o texto de telas que não mostram dados da API. */
+export const LIBRAS_TEXT = {
+  button: 'Libras',
+  buttonLabel: 'Abrir o VLibras, tradutor de português para Libras',
+  buttonHint: 'Abre uma janela com um avatar que traduz os textos desta tela para Libras.',
+  title: 'VLibras',
+  subtitle: 'Tradução do português para Libras',
+  close: 'Fechar',
+  closeLabel: 'Fechar o VLibras',
+  loading: 'Carregando o VLibras… na primeira vez pode demorar um pouco.',
+  pageTitle: 'Texto desta tela',
+  pageHint: 'Toque em um texto para ver a tradução em Libras.',
+  empty: 'Esta tela ainda não tem texto para traduzir.',
+  offline: 'Não foi possível carregar o VLibras. Verifique a internet, feche esta janela e abra de novo.',
+  credit: 'O VLibras é um serviço do Governo Federal. A tradução é automática e não substitui um intérprete de Libras.',
+  screens: {
+    schedule: ['Escolha o horário.', 'Qual horário você quer consultar? Você verá a primeira previsão disponível a partir do horário escolhido.'],
+    activity: ['O que você pretende fazer?', 'Selecione uma atividade para verificar a qualidade prevista.'],
+    models: ['Escolha o modelo.', 'Cada modelo foi desenvolvido por um grupo e pode gerar previsões diferentes para o mesmo horário.'],
+    timeline: ['Próximas previsões.', 'Cada linha mostra o horário e a qualidade esperada da conexão.'],
+  },
+};
+
 export const ERROR_TEXT: Record<ApiErrorKind | 'unknown', string> = {
   network: 'Não foi possível falar com o servidor. Verifique sua internet e tente de novo.',
   timeout: 'O servidor demorou demais para responder. Ele pode estar iniciando; tente de novo em instantes.',
   http: 'O servidor não conseguiu gerar a previsão agora. Tente de novo em alguns instantes.',
   parse: 'O servidor respondeu em um formato inesperado.',
   notFound: 'Não há previsão para este modelo nesta região. Tente escolher outro modelo.',
-  noData: 'Ainda não há previsão para esse horário. Escolha outro horário ou veja as próximas previsões.',
+  noData:
+    'A API não tem previsão para esse dia e horário: ela só cobre um período limitado. Veja as próximas previsões e escolha um horário que esteja na lista.',
+  noModel: 'Nenhum modelo de previsão está disponível agora. Tente de novo em alguns instantes.',
   unknown: 'Algo deu errado ao buscar a previsão. Tente de novo.',
 };

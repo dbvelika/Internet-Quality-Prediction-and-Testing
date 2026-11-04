@@ -12,7 +12,7 @@ export function loadModels(signal?: AbortSignal): Promise<PredictionModel[]> {
 
 async function resolveModel(chosenId: string | null, signal?: AbortSignal): Promise<PredictionModel> {
   const model = pickModel(await loadModels(signal), chosenId);
-  if (!model) throw new ApiError('noData', 'Nenhum modelo ativo.');
+  if (!model) throw new ApiError('noModel', 'Nenhum modelo ativo.');
   return model;
 }
 
@@ -53,9 +53,20 @@ export async function loadTimeline(
   const model = await resolveModel(args.modelId, signal);
   const nearest = await loadNearest(model, args.place, signal);
   return getTimeline(
-    { probeId: nearest.probe.id, modelId: model.id, from: nearest.predictionFor, limit: TIMELINE_LIMIT },
+    { probeId: nearest.probe.id, modelId: model.id, from: timelineStart(nearest.predictionFor), limit: TIMELINE_LIMIT },
     signal,
   );
+}
+
+/**
+ * Quando a "próxima" previsão já passou, a API devolve a última linha que tem — ou seja, os dados são um período
+ * fixo no passado. Começar nela mostraria uma única previsão; por isso a lista começa um dia antes (24 linhas
+ * horárias cobrem esse dia inteiro).
+ */
+function timelineStart(predictionFor: string): string {
+  const instant = new Date(predictionFor).getTime();
+  if (Number.isNaN(instant) || instant >= Date.now()) return predictionFor;
+  return new Date(instant - (TIMELINE_LIMIT - 1) * 3600_000).toISOString();
 }
 
 export async function loadActivityCheck(

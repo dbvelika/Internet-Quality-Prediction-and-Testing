@@ -1,5 +1,7 @@
 import { StyleSheet, Text, View } from 'react-native';
+import { useLibrasText } from '../accessibility';
 import { Button, ChoiceCard, ErrorState, LoadingState, ScreenLayout } from '../components';
+import { LIBRAS_TEXT } from '../content/texts';
 import { useModels } from '../hooks/queries';
 import { pickModel } from '../logic/models';
 import { common } from '../theme/commonStyles';
@@ -8,6 +10,7 @@ import type { EditableScreenProps } from '../types';
 export function ModelsScreen({ state, patch, go }: EditableScreenProps) {
   const { data: models, loading, error, reload } = useModels();
   const currentId = models ? pickModel(models, state.modelId)?.id : null;
+  useLibrasText(error ? [error] : LIBRAS_TEXT.screens.models);
 
   return (
     <ScreenLayout title="Escolha o modelo" onBack={() => go('home')}>

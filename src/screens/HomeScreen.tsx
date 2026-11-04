@@ -1,4 +1,5 @@
 import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { forecastLines, useLibrasText } from '../accessibility';
 import { Button, ErrorState, IconBox, IndicatorRow, LoadingState, PlaceBar, QualityBadge, ScreenLayout } from '../components';
 import { ICONS, QUALITY_ICON } from '../constants/icons';
 import { QUALITY_SUMMARY } from '../content/texts';
@@ -54,6 +55,7 @@ function ForecastSection({ forecast, scheduled }: { forecast: Forecast; schedule
 export function HomeScreen({ state, patch, go }: EditableScreenProps) {
   const { data: forecast, loading, error, reload } = useForecast(state.modelId, state.place, state.schedule);
   const location = useDeviceLocation((place) => patch({ place }));
+  useLibrasText(forecast ? forecastLines(forecast, state.schedule !== null) : error ? [error] : []);
 
   return (
     <ScreenLayout>
@@ -83,6 +85,9 @@ export function HomeScreen({ state, patch, go }: EditableScreenProps) {
 
       {loading ? <LoadingState /> : null}
       {error ? <ErrorState message={error} onRetry={reload} /> : null}
+      {error && state.schedule ? (
+        <Button label="Ver a próxima previsão" onPress={() => patch({ schedule: null })} variant="secondary" />
+      ) : null}
       {forecast ? <ForecastSection forecast={forecast} scheduled={state.schedule !== null} /> : null}
 
       <View style={common.stack}>
