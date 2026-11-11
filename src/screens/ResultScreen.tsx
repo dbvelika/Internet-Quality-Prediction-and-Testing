@@ -11,7 +11,7 @@ import { colors, qualityColors } from '../theme/colors';
 import { common } from '../theme/commonStyles';
 import { radius } from '../theme/tokens';
 import type { ActivityResult, Schedule, ScreenProps } from '../types';
-import { formatDate, formatMs, formatPercent } from '../utils/format';
+import { formatDate, formatDateTime, formatMs, formatPercent } from '../utils/format';
 
 function ResultContent({ result }: { result: ActivityResult }) {
   const c = qualityColors[result.quality];
@@ -52,7 +52,7 @@ export function ResultScreen({ state, go }: ScreenProps) {
   const [when] = useState<Schedule>(() => state.activityWhen ?? nextHour());
   const { data: result, loading, error, reload } = useActivityCheck(state.modelId, state.place, activity, when);
   const info = ACTIVITIES.find((a) => a.code === activity);
-  useLibrasText(result ? activityLines(result, info?.label ?? '', when) : error ? [error] : []);
+  useLibrasText(result ? activityLines(result, info?.label ?? '') : error ? [error] : []);
 
   return (
     <ScreenLayout title="Resultado da previsão" onBack={() => go('activity')}>
@@ -61,8 +61,9 @@ export function ResultScreen({ state, go }: ScreenProps) {
         <View style={styles.activityText}>
           <Text style={styles.activityLabel}>Atividade selecionada</Text>
           <Text style={styles.activityName}>{info?.label}</Text>
+          {/* Com resultado, mostra o horário da previsão que foi realmente usada (pode ser o primeiro depois do pedido). */}
           <Text style={styles.activityWhen}>
-            {formatDate(when.date)} · {when.time}
+            {result ? formatDateTime(result.predictionFor) : `${formatDate(when.date)} · ${when.time}`}
           </Text>
         </View>
       </View>

@@ -69,10 +69,22 @@ function timelineStart(predictionFor: string): string {
   return new Date(instant - (TIMELINE_LIMIT - 1) * 3600_000).toISOString();
 }
 
+/**
+ * Verifica a atividade na primeira previsão que existe naquele horário ou depois dele — a mesma regra da tela
+ * inicial. Isso é necessário porque /activity/check aceita qualquer data: se não houver previsão nela, a API
+ * devolve a linha mais próxima sem avisar qual é, e a tela acabaria mostrando a data pedida com os números de
+ * outro dia. Por isso o app descobre o instante real antes e o envia (a API então usa exatamente aquela linha).
+ */
 export async function loadActivityCheck(
   args: { modelId: string | null; place: Coordinates; when: string; activity: Activity },
   signal?: AbortSignal,
 ): Promise<ActivityResult> {
   const model = await resolveModel(args.modelId, signal);
-  return checkActivity({ modelId: model.id, place: args.place, dateTime: args.when, activity: args.activity }, signal);
+  const nearest = await loadNearest(model, args.place, signal);
+  const [entry] = await getTimeline({ probeId: nearest.probe.id, modelId: model.id, from: args.when, limit: 1 }, signal);
+  if (!entry) throw new ApiError('noData', 'Sem previsão para este horário.');
+  return checkActivity(
+    { modelId: model.id, place: args.place, dateTime: entry.predictionFor, activity: args.activity },
+    signal,
+  );
 }
