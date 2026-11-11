@@ -8,6 +8,7 @@ import { LIBRAS_TEXT } from '../content/texts';
 import { nextHour } from '../logic/schedule';
 import { common } from '../theme/commonStyles';
 import type { Activity, EditableScreenProps } from '../types';
+import { formatDate } from '../utils/format';
 
 export function ActivityScreen({ state, patch, go }: EditableScreenProps) {
   const initial = state.activityWhen ?? state.schedule ?? nextHour();
@@ -35,6 +36,10 @@ export function ActivityScreen({ state, patch, go }: EditableScreenProps) {
         <Text style={common.fieldLabel}>{ICONS.calendar} Quando?</Text>
         <DateChips value={date} onChange={setDate} />
         <TimePicker value={time} onChange={setTime} custom />
+        {/* Os atalhos de data cobrem só os próximos 7 dias; esta linha mostra sempre a data escolhida. */}
+        <Text style={common.hint}>
+          Selecionado: {formatDate(date)} · {time}
+        </Text>
       </View>
 
       <View style={common.stack}>

@@ -50,5 +50,5 @@ export async function checkActivity(
     activity: args.activity,
   };
   const raw = await request<ApiActivityCheckResponse>('POST', '/activity/check', { body, signal });
-  return parse(() => toActivityResult(raw, args.activity));
+  return parse(() => toActivityResult(raw, args.activity, args.dateTime));
 }

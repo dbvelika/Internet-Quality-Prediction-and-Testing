@@ -74,6 +74,8 @@ export interface TimelineEntry {
 
 export interface ActivityResult {
   model: { id: string; name: string };
+  /** Instante (ISO, UTC) da previsão usada. A API não devolve isso, então o app o descobre antes de consultar. */
+  predictionFor: string;
   activity: Activity;
   suitable: boolean;
   quality: Quality;

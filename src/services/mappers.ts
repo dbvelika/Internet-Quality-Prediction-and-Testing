@@ -84,9 +84,11 @@ export function toTimelineEntry(item: ApiTimelineItem): TimelineEntry {
   };
 }
 
-export function toActivityResult(raw: ApiActivityCheckResponse, activity: Activity): ActivityResult {
+/** `predictionFor` não vem na resposta de /activity/check: quem chama informa o instante que foi consultado. */
+export function toActivityResult(raw: ApiActivityCheckResponse, activity: Activity, predictionFor: string): ActivityResult {
   return {
     model: { id: text(raw.model.id, 'model.id'), name: text(raw.model.name, 'model.name') },
+    predictionFor,
     activity,
     suitable: typeof raw.suitable === 'boolean' ? raw.suitable : fail('suitable'),
     quality: toQuality(raw.forecast.quality),

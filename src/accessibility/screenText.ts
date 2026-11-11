@@ -1,8 +1,8 @@
 // ACESSIBILIDADE — transforma o que a tela mostra em frases curtas e por extenso, boas para traduzir em Libras
 // ("49,1 milissegundos" em vez de "49,1 ms"; "quinta-feira, 20 de agosto" em vez de "Qui, 20/08").
 import { ABOUT, GLOSSARY, QUALITY_SUMMARY, SUITABILITY } from '../content/texts';
-import type { ActivityResult, Forecast, ForecastNotes, Schedule, TimelineEntry } from '../types';
-import { formatDate, pad } from '../utils/format';
+import type { ActivityResult, Forecast, ForecastNotes, TimelineEntry } from '../types';
+import { pad } from '../utils/format';
 
 const decimal = (n: number) => n.toFixed(1).replace('.', ',');
 
@@ -29,10 +29,10 @@ export function forecastLines(forecast: Forecast, scheduled: boolean): string[] 
 }
 
 /** Resultado de "Planejar uma atividade". */
-export function activityLines(result: ActivityResult, activityLabel: string, when: Schedule): string[] {
+export function activityLines(result: ActivityResult, activityLabel: string): string[] {
   return [
     `Atividade selecionada: ${activityLabel}.`,
-    `${formatDate(when.date)}, às ${when.time}.`,
+    `Previsão para ${spokenDateTime(result.predictionFor)}.`,
     `Qualidade esperada: ${result.quality.toLowerCase()}.`,
     `${result.suitable ? SUITABILITY.suitable : SUITABILITY.unsuitable}.`,
     result.advice,

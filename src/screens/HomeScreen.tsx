@@ -5,6 +5,7 @@ import { ICONS, QUALITY_ICON } from '../constants/icons';
 import { QUALITY_SUMMARY } from '../content/texts';
 import { useDeviceLocation } from '../hooks/useDeviceLocation';
 import { useForecast } from '../hooks/queries';
+import { scheduleFromIso } from '../logic/schedule';
 import { colors, qualityColors } from '../theme/colors';
 import { common } from '../theme/commonStyles';
 import { radius, touch } from '../theme/tokens';
@@ -57,6 +58,12 @@ export function HomeScreen({ state, patch, go }: EditableScreenProps) {
   const location = useDeviceLocation((place) => patch({ place }));
   useLibrasText(forecast ? forecastLines(forecast, state.schedule !== null) : error ? [error] : []);
 
+  // O horário da atividade parte da previsão que está na tela, e não de um horário guardado de uma consulta anterior.
+  function planActivity() {
+    patch({ activityWhen: forecast ? scheduleFromIso(forecast.predictionFor) : state.schedule });
+    go('activity');
+  }
+
   return (
     <ScreenLayout>
       <View style={common.row}>
@@ -91,7 +98,7 @@ export function HomeScreen({ state, patch, go }: EditableScreenProps) {
       {forecast ? <ForecastSection forecast={forecast} scheduled={state.schedule !== null} /> : null}
 
       <View style={common.stack}>
-        <Button label="Planejar uma atividade" onPress={() => go('activity')} />
+        <Button label="Planejar uma atividade" onPress={planActivity} />
         <Button label="Escolher outro horário" onPress={() => go('schedule')} variant="secondary" />
         <Button label="Entenda esta previsão" onPress={() => go('about')} variant="secondary" />
         <Button label="Ver próximas previsões" onPress={() => go('timeline')} variant="ghost" />
