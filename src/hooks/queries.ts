@@ -1,6 +1,6 @@
 // FUNCIONALIDADE — uma consulta por tipo de dado da API, no formato que as telas usam.
 import { toUtcIso } from '../logic/schedule';
-import { loadActivityCheck, loadForecast, loadModels, loadTimeline } from '../services/forecastService';
+import { loadActivityCheck, loadComparison, loadForecast, loadModels, loadTimeline } from '../services/forecastService';
 import type { Activity, Place, Schedule } from '../types';
 import { useAsync } from './useAsync';
 
@@ -12,6 +12,17 @@ export function useModels() {
 export function useForecast(modelId: string | null, place: Place, schedule: Schedule | null) {
   const when = schedule ? toUtcIso(schedule) : null;
   return useAsync((signal) => loadForecast({ modelId, place, when }, signal), [
+    modelId,
+    place.latitude,
+    place.longitude,
+    when,
+  ]);
+}
+
+/** Os modelos ativos lado a lado no horário da tela inicial (`schedule` nulo = próxima previsão). */
+export function useComparison(modelId: string | null, place: Place, schedule: Schedule | null) {
+  const when = schedule ? toUtcIso(schedule) : null;
+  return useAsync((signal) => loadComparison({ modelId, place, when }, signal), [
     modelId,
     place.latitude,
     place.longitude,

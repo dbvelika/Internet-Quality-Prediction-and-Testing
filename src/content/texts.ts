@@ -53,6 +53,18 @@ export const LIBRAS_TEXT = {
   },
 };
 
+/** Tela "Comparar modelos". A ideia vem do PreditorDeRedes (Pedro Novaes), usada com autorização do autor. */
+export const COMPARE_TEXT = {
+  title: 'Comparar modelos',
+  intro: 'Veja o que cada modelo prevê para o mesmo horário. A API não diz qual é o melhor: eles são apenas diferentes.',
+  loading: 'Comparando os modelos…',
+  forTime: 'Previsão para',
+  inUse: 'Modelo em uso',
+  change: 'Alterar o modelo em uso',
+  back: 'Voltar',
+  credit: 'Ideia de comparar os modelos adaptada do PreditorDeRedes, de Pedro Novaes, usada com autorização do autor.',
+};
+
 export const ERROR_TEXT: Record<ApiErrorKind | 'unknown', string> = {
   network: 'Não foi possível falar com o servidor. Verifique sua internet e tente de novo.',
   timeout: 'O servidor demorou demais para responder. Ele pode estar iniciando; tente de novo em instantes.',
@@ -62,5 +74,6 @@ export const ERROR_TEXT: Record<ApiErrorKind | 'unknown', string> = {
   noData:
     'A API não tem previsão para esse dia e horário: ela só cobre um período limitado. Veja as próximas previsões e escolha um horário que esteja na lista.',
   noModel: 'Nenhum modelo de previsão está disponível agora. Tente de novo em alguns instantes.',
+  noComparison: 'Os modelos não têm previsão para o mesmo horário, então não dá para compará-los agora. Tente outro horário.',
   unknown: 'Algo deu errado ao buscar a previsão. Tente de novo.',
 };

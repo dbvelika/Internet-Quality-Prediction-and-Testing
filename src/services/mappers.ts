@@ -1,7 +1,17 @@
 // SERVIÇOS — traduz as respostas da API para os tipos do app e valida o que chega.
-import type { Activity, ActivityResult, Forecast, ForecastNotes, PredictionModel, Quality, TimelineEntry } from '../types';
+import type {
+  Activity,
+  ActivityResult,
+  Forecast,
+  ForecastNotes,
+  ModelComparison,
+  PredictionModel,
+  Quality,
+  TimelineEntry,
+} from '../types';
 import type {
   ApiActivityCheckResponse,
+  ApiCompareResponse,
   ApiModelListItem,
   ApiNearbyResponse,
   ApiNotes,
@@ -81,6 +91,21 @@ export function toTimelineEntry(item: ApiTimelineItem): TimelineEntry {
     quality: toQuality(item.quality),
     latencyMs: num(item.predictedAvgRttMs, 'predictedAvgRttMs'),
     lossPct: num(item.predictedPacketLossPct, 'predictedPacketLossPct'),
+  };
+}
+
+export function toComparison(raw: ApiCompareResponse): ModelComparison {
+  return {
+    predictionFor: text(raw.predictionFor, 'predictionFor'),
+    models: Array.isArray(raw.models)
+      ? raw.models.map((item) => ({
+          modelId: text(item.modelId, 'models.modelId'),
+          modelName: text(item.modelName, 'models.modelName'),
+          quality: toQuality(item.quality),
+          latencyMs: num(item.predictedAvgRttMs, 'models.predictedAvgRttMs'),
+          lossPct: num(item.predictedPacketLossPct, 'models.predictedPacketLossPct'),
+        }))
+      : fail('models'),
   };
 }
 

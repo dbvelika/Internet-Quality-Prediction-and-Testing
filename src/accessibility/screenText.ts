@@ -1,7 +1,8 @@
 // ACESSIBILIDADE — transforma o que a tela mostra em frases curtas e por extenso, boas para traduzir em Libras
 // ("49,1 milissegundos" em vez de "49,1 ms"; "quinta-feira, 20 de agosto" em vez de "Qui, 20/08").
 import { ABOUT, GLOSSARY, QUALITY_SUMMARY, SUITABILITY } from '../content/texts';
-import type { ActivityResult, Forecast, ForecastNotes, TimelineEntry } from '../types';
+import { summarizeComparison } from '../logic/compare';
+import type { ActivityResult, Forecast, ForecastNotes, ModelComparison, TimelineEntry } from '../types';
 import { pad } from '../utils/format';
 
 const decimal = (n: number) => n.toFixed(1).replace('.', ',');
@@ -39,6 +40,19 @@ export function activityLines(result: ActivityResult, activityLabel: string): st
     spokenLatency(result.latencyMs),
     spokenLoss(result.lossPct),
     result.notes.disclaimer,
+  ];
+}
+
+/** "Comparar modelos": o horário, o resumo e uma frase por modelo. */
+export function comparisonLines(comparison: ModelComparison, currentModelId: string | null): string[] {
+  return [
+    `Comparação dos modelos para ${spokenDateTime(comparison.predictionFor)}.`,
+    summarizeComparison(comparison.models).headline,
+    ...comparison.models.map(
+      (m) =>
+        `${m.modelName}${m.modelId === currentModelId ? ', modelo em uso' : ''}: conexão ${m.quality.toLowerCase()}. ` +
+        `${spokenLatency(m.latencyMs)} ${spokenLoss(m.lossPct)}`,
+    ),
   ];
 }
 

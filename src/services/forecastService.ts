@@ -1,7 +1,15 @@
 // SERVIÇOS — ponto de entrada das telas: combina os endpoints e guarda respostas em cache.
 import { pickModel } from '../logic/models';
-import type { Activity, ActivityResult, Coordinates, Forecast, PredictionModel, TimelineEntry } from '../types';
-import { checkActivity, getNearby, getTimeline, listModels } from './api';
+import type {
+  Activity,
+  ActivityResult,
+  Coordinates,
+  Forecast,
+  ModelComparison,
+  PredictionModel,
+  TimelineEntry,
+} from '../types';
+import { checkActivity, compareModels, getNearby, getTimeline, listModels } from './api';
 import { memo } from './cache';
 import { CACHE_TTL_MS, MODELS_TTL_MS, TIMELINE_LIMIT } from './config';
 import { ApiError } from './http';
@@ -67,6 +75,27 @@ function timelineStart(predictionFor: string): string {
   const instant = new Date(predictionFor).getTime();
   if (Number.isNaN(instant) || instant >= Date.now()) return predictionFor;
   return new Date(instant - (TIMELINE_LIMIT - 1) * 3600_000).toISOString();
+}
+
+/**
+ * Compara o que cada modelo ativo prevê para o mesmo horário da tela inicial. O instante e a probe vêm de
+ * `loadForecast` (a mesma regra da previsão exibida), e o app o envia à API em vez de deixá-la escolher:
+ * assim a comparação é sempre do horário que a pessoa está vendo. Se os modelos não têm um instante em
+ * comum, a API responde 404, que aqui vira `noComparison`.
+ */
+export async function loadComparison(
+  args: { modelId: string | null; place: Coordinates; when: string | null },
+  signal?: AbortSignal,
+): Promise<ModelComparison> {
+  const forecast = await loadForecast(args, signal);
+  try {
+    return await compareModels({ probeId: forecast.probe.id, predictionFor: forecast.predictionFor }, signal);
+  } catch (error) {
+    if (error instanceof ApiError && error.kind === 'notFound') {
+      throw new ApiError('noComparison', 'Os modelos não têm previsão para o mesmo horário.', error.status);
+    }
+    throw error;
+  }
 }
 
 /**
