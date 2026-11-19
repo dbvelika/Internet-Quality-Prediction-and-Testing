@@ -1,14 +1,23 @@
 // SERVIÇOS — uma função por endpoint da API usado pelo app.
-import type { Activity, ActivityResult, Coordinates, Forecast, PredictionModel, TimelineEntry } from '../types';
+import type {
+  Activity,
+  ActivityResult,
+  Coordinates,
+  Forecast,
+  ModelComparison,
+  PredictionModel,
+  TimelineEntry,
+} from '../types';
 import type {
   ApiActivityCheckRequest,
   ApiActivityCheckResponse,
+  ApiCompareResponse,
   ApiModelsResponse,
   ApiNearbyResponse,
   ApiTimelineResponse,
 } from './dto';
 import { request } from './http';
-import { parse, toActivityResult, toForecast, toModel, toTimelineEntry } from './mappers';
+import { parse, toActivityResult, toComparison, toForecast, toModel, toTimelineEntry } from './mappers';
 
 /** GET /models — modelos ativos, em ordem de nome. */
 export async function listModels(signal?: AbortSignal): Promise<PredictionModel[]> {
@@ -35,6 +44,18 @@ export async function getTimeline(
     signal,
   });
   return parse(() => raw.items.map(toTimelineEntry));
+}
+
+/** GET /forecasts/probes/{id}/compare — o que cada modelo ativo prevê para o mesmo instante (ISO, UTC). */
+export async function compareModels(
+  args: { probeId: number; predictionFor: string },
+  signal?: AbortSignal,
+): Promise<ModelComparison> {
+  const raw = await request<ApiCompareResponse>('GET', `/forecasts/probes/${args.probeId}/compare`, {
+    query: { prediction_for: args.predictionFor },
+    signal,
+  });
+  return parse(() => toComparison(raw));
 }
 
 /** POST /activity/check — diz se a atividade parece adequada naquele instante. */

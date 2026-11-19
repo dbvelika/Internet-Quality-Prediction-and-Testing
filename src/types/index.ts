@@ -1,6 +1,6 @@
 // Tipos compartilhados por todo o app.
 
-export type ScreenName = 'home' | 'schedule' | 'about' | 'activity' | 'result' | 'models' | 'timeline';
+export type ScreenName = 'home' | 'schedule' | 'about' | 'activity' | 'result' | 'models' | 'timeline' | 'compare';
 
 /** Categoria mostrada à pessoa. A API envia GOOD / MODERATE / UNSTABLE (ver services/mappers.ts). */
 export type Quality = 'BOA' | 'REGULAR' | 'INSTÁVEL';
@@ -10,7 +10,7 @@ export type Activity = 'VIDEO_CALL' | 'AUDIO_CALL' | 'STREAMING' | 'FILE_UPLOAD'
 
 export type IndicatorKind = 'latency' | 'loss';
 
-export type ApiErrorKind = 'network' | 'timeout' | 'http' | 'parse' | 'notFound' | 'noData' | 'noModel';
+export type ApiErrorKind = 'network' | 'timeout' | 'http' | 'parse' | 'notFound' | 'noData' | 'noModel' | 'noComparison';
 
 export type LocationStatus = 'idle' | 'loading' | 'denied' | 'error';
 
@@ -70,6 +70,22 @@ export interface TimelineEntry {
   quality: Quality;
   latencyMs: number;
   lossPct: number;
+}
+
+/** O que um modelo prevê para o instante comparado. */
+export interface ModelPrediction {
+  modelId: string;
+  modelName: string;
+  quality: Quality;
+  latencyMs: number;
+  lossPct: number;
+}
+
+/** Os modelos ativos lado a lado, para o mesmo instante. */
+export interface ModelComparison {
+  /** Instante (ISO, UTC) comparado. */
+  predictionFor: string;
+  models: ModelPrediction[];
 }
 
 export interface ActivityResult {

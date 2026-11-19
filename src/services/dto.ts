@@ -58,6 +58,21 @@ export interface ApiTimelineResponse {
   items: ApiTimelineItem[];
 }
 
+export interface ApiCompareItem {
+  modelId: string;
+  modelName: string;
+  predictedAvgRttMs: number;
+  predictedPacketLossPct: number;
+  quality: ApiQuality;
+}
+
+/** GET /api/v1/forecasts/probes/{probe_id}/compare */
+export interface ApiCompareResponse {
+  probeId: number;
+  predictionFor: string;
+  models: ApiCompareItem[];
+}
+
 /** POST /api/v1/activity/check (corpo) */
 export interface ApiActivityCheckRequest {
   modelId: string;

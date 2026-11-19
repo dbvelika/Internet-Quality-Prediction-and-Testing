@@ -13,6 +13,7 @@ Projeto acadêmico — ADS, 4º semestre (projeto integrador com a disciplina de
 - **Próximas previsões:** lista de horários seguidos; tocar em um deles abre a previsão daquele horário.
 - **Planejar uma atividade:** diz se a conexão deve servir para chamada de vídeo, chamada de áudio, streaming, envio de arquivos, navegação ou mensagens.
 - **Escolher o modelo de previsão:** a lista de modelos vem da API, então modelos novos aparecem sozinhos.
+- **Comparar os modelos:** mostra lado a lado o que cada modelo prevê para o mesmo horário da tela inicial, com um resumo de quanto eles concordam. A API não diz qual modelo é o melhor, e o app também não (veja "Créditos").
 - **Entenda esta previsão:** explica o que é latência e perda de pacotes e o que a previsão representa.
 - **Localização opcional:** por padrão usa São Paulo como referência. A localização do aparelho só é pedida quando a pessoa toca em "Usar minha localização" e é arredondada (cerca de 1 km). Nada é guardado.
 - **VLibras:** tradução do texto das telas para Libras (veja "Acessibilidade").
@@ -55,13 +56,13 @@ O `App.tsx` só decide qual tela mostrar. Design, regras, dados e textos ficam s
 ```
 App.tsx                  ponto de entrada (troca de telas)
 src/
-├── screens/             as 7 telas: início, horário, atividade, resultado, modelos, próximas previsões, sobre
+├── screens/             as 8 telas: início, horário, atividade, resultado, modelos, comparar modelos, próximas previsões, sobre
 ├── components/          peças visuais reutilizáveis (botão, selo de qualidade, seletor de hora…)
 ├── theme/               cores, tamanhos e estilos comuns (design)
 ├── content/texts.ts     todos os textos: mensagens, glossário, erros, textos do VLibras
 ├── constants/           ícones e lista de atividades
 ├── hooks/               estado do app, consultas à API, localização do aparelho
-├── logic/               regras puras: escolha do modelo, conversão de horários
+├── logic/               regras puras: escolha do modelo, resumo da comparação, conversão de horários
 ├── services/            comunicação com a API: cliente HTTP, validação das respostas, cache
 ├── accessibility/       VLibras (navegador e celular)
 ├── types/               tipos TypeScript
@@ -77,6 +78,7 @@ A URL base é `https://internet-quality-api.onrender.com/api/v1`. O app usa só 
 | `GET /models` | lista de modelos de previsão |
 | `GET /forecasts/nearby` | previsão mais próxima para a latitude e longitude |
 | `GET /forecasts/probes/{id}/timeline` | previsão em um horário e lista de próximas previsões |
+| `GET /forecasts/probes/{id}/compare` | o que cada modelo ativo prevê para o mesmo horário (tela "Comparar modelos") |
 | `POST /activity/check` | se uma atividade é adequada em um horário |
 
 Cuidados do cliente HTTP:
@@ -100,6 +102,11 @@ O app segue os requisitos de acessibilidade do projeto: textos em linguagem simp
 - **Os dados são educacionais.** A API devolve previsões pré-calculadas, e não medições em tempo real. Quando os dados da API cobrem só um período fixo, um horário fora dele mostra um aviso, com a opção "Ver a próxima previsão".
 - **Sem teste de rede no aparelho.** O app mostra previsões da API e não executa testes de latência, jitter ou perda de pacotes no celular.
 - Não há testes automatizados no repositório.
+- **Comparar modelos** só funciona se todos os modelos ativos tiverem previsão para o mesmo horário; se não tiverem, o app mostra um aviso.
+
+## Créditos
+
+- **Comparação de modelos:** a ideia de mostrar "o que cada modelo prevê" para o mesmo horário vem do aplicativo [PreditorDeRedes](https://github.com/PedroNov4es/PreditorDeRedes), de **Pedro Novaes**, e foi usada aqui **com autorização do autor**. A implementação é do PredictNet (usa nossa arquitetura de serviços, hooks e telas e o resumo de concordância em `src/logic/compare.ts`). O repositório do PreditorDeRedes só traz a licença MIT do modelo do Expo, e não uma licença própria; por isso o uso se apoia na autorização do Pedro e neste crédito.
 
 ## Referências
 

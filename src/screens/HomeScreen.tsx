@@ -100,6 +100,7 @@ export function HomeScreen({ state, patch, go }: EditableScreenProps) {
       <View style={common.stack}>
         <Button label="Planejar uma atividade" onPress={planActivity} />
         <Button label="Escolher outro horário" onPress={() => go('schedule')} variant="secondary" />
+        <Button label="Comparar os modelos" onPress={() => go('compare')} variant="secondary" />
         <Button label="Entenda esta previsão" onPress={() => go('about')} variant="secondary" />
         <Button label="Ver próximas previsões" onPress={() => go('timeline')} variant="ghost" />
       </View>

@@ -5,6 +5,7 @@ import { LibrasProvider, VLibras } from './src/accessibility';
 import { useAppState } from './src/hooks/useAppState';
 import { AboutScreen } from './src/screens/AboutScreen';
 import { ActivityScreen } from './src/screens/ActivityScreen';
+import { CompareScreen } from './src/screens/CompareScreen';
 import { HomeScreen } from './src/screens/HomeScreen';
 import { ModelsScreen } from './src/screens/ModelsScreen';
 import { ResultScreen } from './src/screens/ResultScreen';
@@ -25,6 +26,7 @@ export default function App() {
         {state.screen === 'result' && <ResultScreen state={state} go={go} />}
         {state.screen === 'models' && <ModelsScreen state={state} patch={patch} go={go} />}
         {state.screen === 'timeline' && <TimelineScreen state={state} patch={patch} go={go} />}
+        {state.screen === 'compare' && <CompareScreen state={state} patch={patch} go={go} />}
         <VLibras />
       </LibrasProvider>
     </SafeAreaProvider>
