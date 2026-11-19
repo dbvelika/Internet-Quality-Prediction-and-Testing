@@ -86,6 +86,10 @@ Cuidados do cliente HTTP:
 - Os horários são escolhidos no fuso do aparelho e enviados à API em UTC.
 - A API não informa **jitter**, então o app mostra latência e perda de pacotes.
 
+### Dados reais (opcional)
+
+Em `tools/coletor-ripe-atlas/` há um coletor em Python que baixa medições reais do RIPE Atlas, calcula as previsões e gera os arquivos que a API Java lê (`predictions.csv` e `models.json`). Veja o README dessa pasta.
+
 ## Acessibilidade
 
 O app segue os requisitos de acessibilidade do projeto: textos em linguagem simples, alvos de toque de pelo menos 48 dp, informação que não depende só de cor (a qualidade tem ícone e texto), glossário para latência e perda de pacotes, e rótulos para leitores de tela.
